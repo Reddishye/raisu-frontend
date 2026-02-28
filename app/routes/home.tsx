@@ -24,6 +24,7 @@ export default function Home() {
   const subRef = useRef<HTMLParagraphElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
+  const quoteRef = useRef<HTMLBlockquoteElement>(null);
 
   useEffect(() => {
     let ctx: { revert?: () => void } = {};
@@ -67,6 +68,15 @@ export default function Home() {
             { opacity: 0, y: 28 },
             { opacity: 1, y: 0, duration: 0.5, stagger: 0.1 },
             "-=0.2"
+          );
+        }
+
+        if (quoteRef.current) {
+          tl.fromTo(
+            quoteRef.current,
+            { opacity: 0, y: 20 },
+            { opacity: 1, y: 0, duration: 0.6 },
+            "-=0.1"
           );
         }
       });
@@ -221,6 +231,22 @@ export default function Home() {
             </div>
           ))}
         </div>
+
+        {/* Citation */}
+        <blockquote
+          ref={quoteRef}
+          className="mt-20 max-w-xl mx-auto w-full text-left border-l-2 border-violet-500/40 pl-5 space-y-3"
+        >
+          <p className="text-zinc-300 text-sm sm:text-base leading-relaxed font-medium italic">
+            "plz use my lib tysm. this frontend was vibecoded in the best way possible fyk. contributions are welcome and appreciated"
+          </p>
+          <footer className="flex items-center gap-3">
+            <span className="w-5 h-px bg-zinc-700" />
+            <cite className="not-italic text-xs text-zinc-500 font-medium">
+              reddishye <span className="text-zinc-700 mx-1">·</span> the stupid developer of Raisu
+            </cite>
+          </footer>
+        </blockquote>
       </main>
 
       {/* Footer */}
