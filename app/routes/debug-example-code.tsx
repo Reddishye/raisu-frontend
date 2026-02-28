@@ -217,6 +217,22 @@ const MOCK: Snapshot = {
         { type: "LINK", data: { label: "Developer docs",        url: "/docs" } },
       ],
     },
+    {
+      id: "iframe",
+      name: "Embedded View",
+      icon: ":lucide:app-window",
+      priority: 10,
+      components: [
+        {
+          type: "IFRAME",
+          data: {
+            url: "https://status.papermc.io",
+            title: "PaperMC Status",
+            height: 420,
+          },
+        },
+      ],
+    },
   ],
 };
 
@@ -325,7 +341,7 @@ export default function DebugExampleCodePage() {
 
         {/* Main scroll area */}
         <main ref={mainRef} className="flex-1 overflow-y-auto scroll-smooth">
-          <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 pb-24 md:pb-8 space-y-5">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 pb-24 md:pb-8 space-y-5">
             {sorted.map((cat) => (
               <section
                 key={cat.id}
