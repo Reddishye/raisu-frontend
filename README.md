@@ -12,6 +12,7 @@ A modern, production-ready template for building full-stack React applications u
 - 🔄 Data loading and mutations
 - 🔒 TypeScript by default
 - 🎉 TailwindCSS for styling
+- 🔖 Custom favicon using the Raisu logo
 - 📖 [React Router docs](https://reactrouter.com/)
 
 ## Getting Started
