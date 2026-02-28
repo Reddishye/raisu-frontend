@@ -26,6 +26,7 @@ import {
   ExternalLink,
   AppWindow,
 } from "lucide-react";
+import { RaisuLogo } from "../components/RaisuLogo";
 import Prism from "prismjs";
 import "prismjs/components/prism-java";
 import "prismjs/components/prism-kotlin";
@@ -300,13 +301,13 @@ export default function DocsPage() {
         <div className="flex items-center gap-3 px-5 h-13">
           <Link
             to="/"
-            className="text-zinc-600 hover:text-zinc-300 transition-colors"
+            className="text-zinc-600 hover:text-zinc-300 transition-colors shrink-0"
             aria-label="Back to home"
           >
             <ArrowLeft className="w-4 h-4" />
           </Link>
-          <span className="font-bold text-sm tracking-tight">Raisu</span>
-          <div className="w-px h-4 bg-zinc-800" />
+          <RaisuLogo iconSize={22} wordmark className="shrink-0" />
+          <div className="w-px h-4 bg-zinc-800 shrink-0" />
           <div className="flex items-center gap-1.5 text-zinc-400 text-sm">
             <BookOpen className="w-3.5 h-3.5" />
             <span>Documentation</span>
