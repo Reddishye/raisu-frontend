@@ -24,6 +24,7 @@ import {
   TrendingUp,
   Gauge,
   ExternalLink,
+  AppWindow,
 } from "lucide-react";
 import Prism from "prismjs";
 import "prismjs/components/prism-java";
@@ -680,7 +681,7 @@ new TreeImpl(new TreeNodeImpl("root", children))
                     <span className="text-sm font-semibold text-zinc-200">Display</span>
                   </div>
                   <p className="text-zinc-500 text-xs leading-relaxed">
-                    Rich data widgets: BADGE, STAT, ALERT, CODE_BLOCK, LOG_VIEW, TIMELINE, SPARKLINE, GAUGE, LINK
+                    Rich data widgets: BADGE, STAT, ALERT, CODE_BLOCK, LOG_VIEW, TIMELINE, SPARKLINE, GAUGE, LINK, IFRAME
                   </p>
                 </div>
               </div>
@@ -999,6 +1000,35 @@ Gauge.builder("Heap", usedMb, maxMb).unit("MB").build()
 Link.of("View on GitHub", "https://github.com/...")
                 `}</CodeBlock>
               </div>
+
+              {/* IFRAME */}
+              <div className="mb-8 space-y-3">
+                <V2Badge label="IFRAME" Icon={AppWindow} />
+                <p className="text-zinc-400 text-sm leading-relaxed">
+                  Embeds an external web page inside the snapshot. The frame is sandboxed
+                  ({ic("`allow-scripts allow-same-origin allow-forms allow-popups`")}) and lazy-loaded.
+                  Use this to embed dashboards, status pages, or any URL-accessible resource directly
+                  into a category.
+                </p>
+                <DocTable
+                  headers={["Field", "Type", "Description"]}
+                  rows={[
+                    [ic("`url`"), "String", "URL of the page to embed"],
+                    [ic("`title`"), "String?", "Optional label shown above the frame"],
+                    [ic("`height`"), "int?", "Frame height in pixels (default: 400)"],
+                  ]}
+                />
+                <CodeBlock lang="java">{`
+// Minimal — embed a URL at the default 400 px height
+Iframe.of("https://status.example.com")
+
+// With label and custom height
+Iframe.of("https://grafana.example.com/d/xyz", "Grafana Dashboard", 600)
+
+// Via Components factory
+Components.iframe("https://status.example.com", "Service Status", 300)
+                `}</CodeBlock>
+              </div>
             </section>
 
             {/* ══════════════════════════════════════════════════════════════ */}
@@ -1301,6 +1331,8 @@ GAUGE      { label: string, current: double, max: double, unit: string|nil }
            // min is always 0; pct = current / max
 LINK       { label: string, url: string }
            // http/https URLs are opened in a new tab automatically
+IFRAME     { url: string, title: string|nil, height: int|nil }
+           // height defaults to 400 px; frame is sandboxed
 
 // ── GAUGE COLOUR THRESHOLDS ───────────────────────────────────────────────────
 // pct = current / max
