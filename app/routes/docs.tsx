@@ -31,6 +31,7 @@ import {
   Share2,
   Trash2,
   RefreshCw,
+  Globe,
 } from "lucide-react";
 import { RaisuLogo } from "../components/RaisuLogo";
 import Prism from "prismjs";
@@ -437,6 +438,7 @@ const NAV: { group: string; icon: React.ElementType; items: { id: string; label:
       { id: "ref-builtins", label: "Built-in categories" },
       { id: "ref-platform", label: "RaisuPlatform" },
       { id: "ref-versioning", label: "Snapshot versioning" },
+      { id: "ref-api", label: "Paste endpoints" },
     ],
   },
   {
@@ -1354,6 +1356,105 @@ public interface RaisuPlatform {
                 Library consumers do not need to interact with version numbers
                 directly. The frontend handles all parsing and version detection
                 automatically.
+              </Callout>
+            </section>
+
+            <section id="ref-api" className="scroll-mt-20">
+              <SectionH2 icon={Globe}>Paste provider endpoints</SectionH2>
+              <p className="text-zinc-400 text-sm leading-relaxed mb-5">
+                Raisu does not run its own backend. Snapshots are stored on one
+                of two supported paste services. The shortcode bundles the
+                provider ID, paste key, and AES-128 key, so the viewer knows
+                exactly where to fetch and how to decrypt — with no external
+                server involved.
+              </p>
+
+              <p className="text-zinc-500 text-xs font-semibold uppercase tracking-widest mb-2">
+                Fetch endpoints (viewer → paste service)
+              </p>
+              <DocTable
+                headers={["ID", "Provider", "Fetch URL", "Response"]}
+                rows={[
+                  [
+                    ic("`0`"),
+                    "pastes.dev",
+                    ic("`GET https://api.pastes.dev/{key}`"),
+                    ic("`text/plain` — Base64 ciphertext"),
+                  ],
+                  [
+                    ic("`1`"),
+                    "Hastebin",
+                    ic("`GET https://hastebin.com/raw/{key}`"),
+                    ic("`text/plain` — Base64 ciphertext"),
+                  ],
+                ]}
+              />
+
+              <p className="text-zinc-500 text-xs font-semibold uppercase tracking-widest mt-6 mb-2">
+                Upload endpoints (plugin → paste service)
+              </p>
+              <DocTable
+                headers={["Provider", "Upload URL", "Body", "Response"]}
+                rows={[
+                  [
+                    "pastes.dev",
+                    ic("`POST https://api.pastes.dev/post`"),
+                    ic("`text/plain` — Base64 data"),
+                    "Plain-text key",
+                  ],
+                  [
+                    "Hastebin",
+                    ic("`POST https://hastebin.com/documents`"),
+                    ic("`text/plain` — Base64 data"),
+                    ic('`{"key": "..."}`'),
+                  ],
+                ]}
+              />
+
+              <p className="text-zinc-400 text-sm leading-relaxed mt-6 mb-3">
+                Complete client-side decode pipeline (TypeScript / browser):
+              </p>
+              <CodeBlock lang="kotlin">{`
+// ── 1. Extract shortcode from URL hash ───────────────────────────────────────
+const shortcode = window.location.hash.slice(1);
+
+// ── 2. Decode shortcode (base64url → structured bytes) ───────────────────────
+const bytes = base64urlToBytes(shortcode);   // replace - → +, _ → /
+const providerId = bytes[0];                 // 0 = pastes.dev, 1 = hastebin
+const keyLen     = bytes[1];                 // byte length of the paste key
+const pasteKey   = utf8Decode(bytes.slice(2, 2 + keyLen));
+const aesKey     = bytes.slice(2 + keyLen);  // raw 16-byte AES-128 key
+
+// ── 3. Fetch ciphertext from paste provider ───────────────────────────────────
+const ENDPOINTS = {
+  0: (k) => \`https://api.pastes.dev/\${k}\`,
+  1: (k) => \`https://hastebin.com/raw/\${k}\`,
+};
+const res  = await fetch(ENDPOINTS[providerId](pasteKey));
+const b64  = await res.text();               // Base64-encoded ciphertext
+
+// ── 4. Base64 decode ──────────────────────────────────────────────────────────
+const blob = Uint8Array.from(atob(b64.trim()), c => c.charCodeAt(0));
+
+// ── 5. AES-CBC decrypt (WebCrypto) ────────────────────────────────────────────
+const cryptoKey = await crypto.subtle.importKey(
+  "raw", aesKey, { name: "AES-CBC" }, false, ["decrypt"]
+);
+const iv         = blob.slice(0, 16);        // first 16 bytes = IV
+const ciphertext = blob.slice(16);
+const plaintext  = await crypto.subtle.decrypt(
+  { name: "AES-CBC", iv }, cryptoKey, ciphertext
+);
+
+// ── 6. MessagePack decode ─────────────────────────────────────────────────────
+import { decode } from "@msgpack/msgpack";
+const snapshot = decode(new Uint8Array(plaintext));
+// → { version, timestamp, serverVersion, javaVersion, categories[] }
+              `}</CodeBlock>
+
+              <Callout>
+                Both paste providers support CORS, so the decode pipeline runs
+                entirely in the browser. No proxy or backend is required.
               </Callout>
             </section>
 
