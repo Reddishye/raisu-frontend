@@ -79,12 +79,34 @@ async function decrypt(
 
 // ── Pipeline ───────────────────────────────────────────────────────────────
 
+const SUPPORTED_VERSIONS = new Set([0, 1, 2]);
+
 export async function loadSnapshot(shortcode: string): Promise<Snapshot> {
   const { providerId, pasteKey, aesKey } = decodeShortcode(shortcode);
   const b64 = await fetchPayload(providerId, pasteKey);
   const encryptedBytes = base64ToBytes(b64);
   const plaintextBytes = await decrypt(encryptedBytes, aesKey);
-  return decode(plaintextBytes) as Snapshot;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const raw = decode(plaintextBytes) as Record<string, any>;
+
+  const version: number = typeof raw.version === "number" ? raw.version : 0;
+
+  if (!SUPPORTED_VERSIONS.has(version)) {
+    console.warn(
+      `Unknown snapshot version ${version} — attempting best-effort render`
+    );
+  }
+
+  return {
+    version,
+    timestamp: raw.timestamp,
+    serverVersion: raw.serverVersion,
+    javaVersion: raw.javaVersion,
+    categories: (raw.categories ?? []).sort(
+      (a: { priority: number }, b: { priority: number }) =>
+        a.priority - b.priority
+    ),
+  };
 }
 
 // ── Adventure component name parsing ──────────────────────────────────────
@@ -92,12 +114,15 @@ export async function loadSnapshot(shortcode: string): Promise<Snapshot> {
 export function parseCategoryName(raw: string): string {
   try {
     const parsed = JSON.parse(raw);
+    // Plain JSON string: "Category" → Category
+    if (typeof parsed === "string") return parsed;
+    // Adventure component object: {"text":"Category"}
     if (typeof parsed?.text === "string") return parsed.text;
-    // Handle array of components (Adventure uses arrays too)
+    // Array of Adventure components: [{"text":"Category"}]
     if (Array.isArray(parsed) && typeof parsed[0]?.text === "string")
       return parsed[0].text;
   } catch {
-    // not JSON, use raw string
+    // not JSON — use raw string as-is
   }
   return raw;
 }
