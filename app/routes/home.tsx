@@ -25,7 +25,7 @@ export default function Home() {
   const subRef = useRef<HTMLParagraphElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
-  const quoteRef = useRef<HTMLBlockquoteElement>(null);
+  const quoteRef = useRef<HTMLQuoteElement>(null);
 
   useEffect(() => {
     let ctx: { revert?: () => void } = {};
