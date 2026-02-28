@@ -438,7 +438,7 @@ const NAV: { group: string; icon: React.ElementType; items: { id: string; label:
       { id: "ref-builtins", label: "Built-in categories" },
       { id: "ref-platform", label: "RaisuPlatform" },
       { id: "ref-versioning", label: "Snapshot versioning" },
-      { id: "ref-api", label: "Paste endpoints" },
+      { id: "ref-api", label: "HTTP API" },
     ],
   },
   {
@@ -1360,101 +1360,121 @@ public interface RaisuPlatform {
             </section>
 
             <section id="ref-api" className="scroll-mt-20">
-              <SectionH2 icon={Globe}>Paste provider endpoints</SectionH2>
+              <SectionH2 icon={Globe}>HTTP API</SectionH2>
               <p className="text-zinc-400 text-sm leading-relaxed mb-5">
-                Raisu does not run its own backend. Snapshots are stored on one
-                of two supported paste services. The shortcode bundles the
-                provider ID, paste key, and AES-128 key, so the viewer knows
-                exactly where to fetch and how to decrypt — with no external
-                server involved.
+                The Raisu frontend exposes a server-side JSON endpoint that
+                accepts a shortcode, runs the full fetch → decrypt → deserialize
+                pipeline, and returns the decoded snapshot. Use this to
+                programmatically access snapshot data without reimplementing the
+                decode logic yourself.
               </p>
 
+              {/* Endpoint block */}
+              <div className="rounded-xl border border-zinc-800/60 bg-zinc-900/30 overflow-hidden mb-6">
+                <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800/60">
+                  <span className="px-2 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/20 text-emerald-300 text-[11px] font-mono font-bold">
+                    GET
+                  </span>
+                  <code className="font-mono text-zinc-200 text-sm">
+                    /api/snapshot
+                  </code>
+                </div>
+                <div className="px-4 py-3 space-y-1">
+                  <p className="text-zinc-500 text-xs">
+                    Decodes a snapshot shortcode and returns the full JSON
+                    payload. The server handles fetch, AES-CBC decryption, and
+                    MessagePack deserialisation. Response is cached for 30
+                    seconds.
+                  </p>
+                </div>
+              </div>
+
               <p className="text-zinc-500 text-xs font-semibold uppercase tracking-widest mb-2">
-                Fetch endpoints (viewer → paste service)
+                Query parameters
               </p>
               <DocTable
-                headers={["ID", "Provider", "Fetch URL", "Response"]}
+                headers={["Parameter", "Type", "Required", "Description"]}
                 rows={[
                   [
-                    ic("`0`"),
-                    "pastes.dev",
-                    ic("`GET https://api.pastes.dev/{key}`"),
-                    ic("`text/plain` — Base64 ciphertext"),
-                  ],
-                  [
-                    ic("`1`"),
-                    "Hastebin",
-                    ic("`GET https://hastebin.com/raw/{key}`"),
-                    ic("`text/plain` — Base64 ciphertext"),
+                    ic("`code`"),
+                    "string",
+                    "Yes",
+                    "The base64url shortcode from the viewer URL hash (everything after #)",
                   ],
                 ]}
               />
 
               <p className="text-zinc-500 text-xs font-semibold uppercase tracking-widest mt-6 mb-2">
-                Upload endpoints (plugin → paste service)
+                Responses
               </p>
               <DocTable
-                headers={["Provider", "Upload URL", "Body", "Response"]}
+                headers={["Status", "Body", "When"]}
                 rows={[
                   [
-                    "pastes.dev",
-                    ic("`POST https://api.pastes.dev/post`"),
-                    ic("`text/plain` — Base64 data"),
-                    "Plain-text key",
+                    ic("`200 OK`"),
+                    ic("`application/json` — Snapshot object"),
+                    "Shortcode decoded successfully",
                   ],
                   [
-                    "Hastebin",
-                    ic("`POST https://hastebin.com/documents`"),
-                    ic("`text/plain` — Base64 data"),
-                    ic('`{"key": "..."}`'),
+                    ic("`400 Bad Request`"),
+                    ic('`{"error": "Missing \'code\' query parameter"}`'),
+                    ic("`code` param absent"),
+                  ],
+                  [
+                    ic("`500 Internal Server Error`"),
+                    ic('`{"error": "..."}`'),
+                    "Fetch, decrypt, or parse failed",
                   ],
                 ]}
               />
 
               <p className="text-zinc-400 text-sm leading-relaxed mt-6 mb-3">
-                Complete client-side decode pipeline (TypeScript / browser):
+                Example request:
               </p>
               <CodeBlock lang="kotlin">{`
-// ── 1. Extract shortcode from URL hash ───────────────────────────────────────
-const shortcode = window.location.hash.slice(1);
+GET /api/snapshot?code=AABB...
+              `}</CodeBlock>
 
-// ── 2. Decode shortcode (base64url → structured bytes) ───────────────────────
-const bytes = base64urlToBytes(shortcode);   // replace - → +, _ → /
-const providerId = bytes[0];                 // 0 = pastes.dev, 1 = hastebin
-const keyLen     = bytes[1];                 // byte length of the paste key
-const pasteKey   = utf8Decode(bytes.slice(2, 2 + keyLen));
-const aesKey     = bytes.slice(2 + keyLen);  // raw 16-byte AES-128 key
-
-// ── 3. Fetch ciphertext from paste provider ───────────────────────────────────
-const ENDPOINTS = {
-  0: (k) => \`https://api.pastes.dev/\${k}\`,
-  1: (k) => \`https://hastebin.com/raw/\${k}\`,
-};
-const res  = await fetch(ENDPOINTS[providerId](pasteKey));
-const b64  = await res.text();               // Base64-encoded ciphertext
-
-// ── 4. Base64 decode ──────────────────────────────────────────────────────────
-const blob = Uint8Array.from(atob(b64.trim()), c => c.charCodeAt(0));
-
-// ── 5. AES-CBC decrypt (WebCrypto) ────────────────────────────────────────────
-const cryptoKey = await crypto.subtle.importKey(
-  "raw", aesKey, { name: "AES-CBC" }, false, ["decrypt"]
-);
-const iv         = blob.slice(0, 16);        // first 16 bytes = IV
-const ciphertext = blob.slice(16);
-const plaintext  = await crypto.subtle.decrypt(
-  { name: "AES-CBC", iv }, cryptoKey, ciphertext
-);
-
-// ── 6. MessagePack decode ─────────────────────────────────────────────────────
-import { decode } from "@msgpack/msgpack";
-const snapshot = decode(new Uint8Array(plaintext));
-// → { version, timestamp, serverVersion, javaVersion, categories[] }
+              <p className="text-zinc-400 text-sm leading-relaxed mt-5 mb-3">
+                200 response shape:
+              </p>
+              <CodeBlock lang="kotlin">{`
+{
+  "version": 2,
+  "timestamp": 1734123456789,
+  "serverVersion": "Paper 1.21.4",
+  "javaVersion": "21.0.3",
+  "categories": [
+    {
+      "id": "raisu:system",
+      "name": "{\"text\":\"System\"}",
+      "icon": "💻",
+      "priority": 0,
+      "components": [
+        {
+          "type": "KEY_VALUE",
+          "data": { "key": "OS", "value": "Linux 6.1.0" }
+        },
+        {
+          "type": "STAT",
+          "data": {
+            "label": "Uptime",
+            "value": "14",
+            "unit": "days",
+            "trend": null,
+            "description": null
+          }
+        }
+      ]
+    }
+  ]
+}
               `}</CodeBlock>
 
               <Callout>
-                Both paste providers support CORS, so the decode pipeline runs
-                entirely in the browser. No proxy or backend is required.
+                {ic(
+                  "The `name` field is an Adventure Component serialised as JSON — parse it with `JSON.parse()` and read `.text` for the plain display string."
+                )}
               </Callout>
             </section>
 
