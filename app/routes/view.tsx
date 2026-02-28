@@ -13,6 +13,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { Link } from "react-router";
+import { RaisuLogo } from "../components/RaisuLogo";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -200,7 +201,7 @@ export default function ViewPage() {
           <Link to="/" className="text-zinc-600 hover:text-zinc-300 transition-colors shrink-0" aria-label="Back">
             <ArrowLeft className="w-4 h-4" />
           </Link>
-          <span className="font-bold text-sm tracking-tight text-white shrink-0">Raisu</span>
+          <RaisuLogo iconSize={22} wordmark className="shrink-0" />
           <span className="text-zinc-800 hidden sm:block shrink-0">|</span>
           <span className="hidden sm:block text-zinc-400 text-sm font-mono truncate min-w-0">
             {snapshot.serverVersion}
