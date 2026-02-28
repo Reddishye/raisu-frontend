@@ -22,6 +22,7 @@ import { TimelineComponent } from "./TimelineComponent";
 import { SparklineComponent } from "./SparklineComponent";
 import { GaugeComponent } from "./GaugeComponent";
 import { LinkComponent } from "./LinkComponent";
+import { IframeComponent } from "./IframeComponent";
 
 export function ComponentRenderer({ component }: { component: RaisuComponent }) {
   const { type, data } = component;
@@ -70,6 +71,8 @@ export function ComponentRenderer({ component }: { component: RaisuComponent }) 
       return <GaugeComponent data={data as any} />;
     case "LINK":
       return <LinkComponent data={data as any} />;
+    case "IFRAME":
+      return <IframeComponent data={data as any} />;
     default:
       return null; // skip unknown types gracefully
   }
