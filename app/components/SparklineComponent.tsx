@@ -9,19 +9,21 @@ export const SparklineComponent = memo(function SparklineComponent({ data }: { d
   const min    = Math.min(...values);
   const max    = Math.max(...values);
   const range  = max - min || 1;
-  const H      = 48;
-  const W      = 160;
-  const padX   = 2;
-  const padY   = 4;
+  const H      = 56;
+  const W      = 200;
+  const padX   = 3;
+  const padY   = 5;
   const innerW = W - padX * 2;
   const innerH = H - padY * 2;
 
   const pts = values.map((v, i) => {
     const x = padX + (i / Math.max(values.length - 1, 1)) * innerW;
     const y = padY + innerH - ((v - min) / range) * innerH;
-    return `${x.toFixed(2)},${y.toFixed(2)}`;
+    return [x, y] as [number, number];
   });
-  const polyline = pts.join(" ");
+
+  const polyline = pts.map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join(" ");
+  const [lx, ly] = pts[pts.length - 1];
 
   const lastVal  = values[values.length - 1];
   const firstVal = values[0];
@@ -32,15 +34,18 @@ export const SparklineComponent = memo(function SparklineComponent({ data }: { d
   const valCls    = diff > 0 ? "text-emerald-300" : diff < 0 ? "text-red-300"  : "text-zinc-100";
   const lineColor = diff > 0 ? "#34d399" : diff < 0 ? "#f87171" : "#8b5cf6";
 
+  // SVG gradient IDs must not contain spaces or special chars
+  const gradId = `sg-${data.label.replace(/[^a-zA-Z0-9]/g, "_")}`;
+
   return (
-    <div className="flex items-center justify-between gap-4 px-5 py-4">
+    <div className="flex items-center justify-between gap-6 px-5 py-4">
       <div className="min-w-0">
         <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest mb-1.5">
           {data.label}
         </p>
         <div className="flex items-baseline gap-1.5">
           <span className={`text-2xl font-black tabular-nums leading-none tracking-tight ${valCls}`}>
-            {lastVal.toLocaleString()}
+            {lastVal.toLocaleString(undefined, { maximumFractionDigits: 2 })}
           </span>
           {data.unit && <span className="text-xs text-zinc-600">{data.unit}</span>}
         </div>
@@ -53,29 +58,41 @@ export const SparklineComponent = memo(function SparklineComponent({ data }: { d
           )}
         </div>
       </div>
+
       <svg
         viewBox={`0 0 ${W} ${H}`}
-        className="shrink-0"
-        style={{ width: 100, height: 36 }}
+        className="shrink-0 overflow-visible"
+        style={{ width: 130, height: 46 }}
         aria-hidden
       >
         <defs>
-          <linearGradient id={`sg-${data.label}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={lineColor} stopOpacity="0.4" />
+          <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stopColor={lineColor} stopOpacity="0.5" />
             <stop offset="100%" stopColor={lineColor} stopOpacity="0" />
           </linearGradient>
         </defs>
+        {/* Fill area */}
         <polygon
           points={`${padX},${H - padY} ${polyline} ${W - padX},${H - padY}`}
-          fill={`url(#sg-${data.label})`}
+          fill={`url(#${gradId})`}
         />
+        {/* Line */}
         <polyline
           points={polyline}
           fill="none"
           stroke={lineColor}
-          strokeWidth="1.5"
+          strokeWidth="2"
           strokeLinejoin="round"
           strokeLinecap="round"
+          strokeOpacity="0.9"
+        />
+        {/* Last-value dot */}
+        <circle
+          cx={lx.toFixed(2)}
+          cy={ly.toFixed(2)}
+          r="3"
+          fill={lineColor}
+          opacity="0.9"
         />
       </svg>
     </div>
