@@ -2,6 +2,7 @@ import { useNavigate, Link } from "react-router";
 import { useState, useEffect, useRef } from "react";
 import type { Route } from "./+types/home";
 import { ArrowRight, Shield, Zap, Layers, Lock, BookOpen } from "lucide-react";
+import { RaisuLogo } from "../components/RaisuLogo";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -120,9 +121,9 @@ export default function Home() {
         className="relative z-10 border-b border-zinc-800/50 px-6 py-4 flex items-center justify-between"
         style={{ backdropFilter: "blur(12px)", background: "rgba(9,9,11,0.7)" }}
       >
-        <div className="flex items-center gap-2.5">
-          <span className="font-bold text-base tracking-tight">Raisu</span>
-          <span className="text-[10px] font-mono text-zinc-600 border border-zinc-800 rounded px-1.5 py-0.5">
+        <div className="flex items-center gap-3">
+          <RaisuLogo iconSize={26} wordmark />
+          <span className="text-[10px] font-mono text-zinc-600 border border-zinc-800 rounded px-1.5 py-0.5 hidden sm:block">
             snapshot viewer
           </span>
         </div>
