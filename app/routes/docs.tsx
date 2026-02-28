@@ -25,6 +25,12 @@ import {
   Gauge,
   ExternalLink,
   AppWindow,
+  Package,
+  Zap,
+  Camera,
+  Share2,
+  Trash2,
+  RefreshCw,
 } from "lucide-react";
 import { RaisuLogo } from "../components/RaisuLogo";
 import Prism from "prismjs";
@@ -185,12 +191,21 @@ function DocTable({
   );
 }
 
-function SectionH2({ id, children }: { id?: string; children: ReactNode }) {
+function SectionH2({
+  id,
+  icon: Icon,
+  children,
+}: {
+  id?: string;
+  icon?: React.ElementType;
+  children: ReactNode;
+}) {
   return (
     <h2
       id={id}
-      className="text-xl font-bold text-zinc-100 mt-0 mb-4 pb-2 border-b border-zinc-800/50 scroll-mt-20"
+      className="text-xl font-bold text-zinc-100 mt-0 mb-4 pb-2 border-b border-zinc-800/50 scroll-mt-20 flex items-center gap-2"
     >
+      {Icon && <Icon className="w-4 h-4 text-violet-400 shrink-0" />}
       {children}
     </h2>
   );
@@ -354,9 +369,10 @@ function DependencySelector({ defaultVersion }: { defaultVersion: string }) {
 
 // ── Navigation structure ───────────────────────────────────────────────────────
 
-const NAV = [
+const NAV: { group: string; icon: React.ElementType; items: { id: string; label: string }[] }[] = [
   {
     group: "Introduction",
+    icon: BookOpen,
     items: [
       { id: "overview", label: "Overview" },
       { id: "pipeline", label: "How it works" },
@@ -364,6 +380,7 @@ const NAV = [
   },
   {
     group: "Setup",
+    icon: Package,
     items: [
       { id: "modules", label: "Modules" },
       { id: "gradle", label: "Installation" },
@@ -371,6 +388,7 @@ const NAV = [
   },
   {
     group: "Quick Start",
+    icon: Zap,
     items: [
       { id: "qs-paper", label: "Paper plugin" },
       { id: "qs-spigot", label: "Spigot plugin" },
@@ -379,6 +397,7 @@ const NAV = [
   },
   {
     group: "Categories",
+    icon: Layers,
     items: [
       { id: "cat-static", label: "Static categories" },
       { id: "cat-dynamic", label: "Dynamic providers" },
@@ -387,6 +406,7 @@ const NAV = [
   },
   {
     group: "Components V1",
+    icon: Code2,
     items: [
       { id: "comp-types", label: "Component types" },
       { id: "comp-create", label: "Creating components" },
@@ -394,6 +414,7 @@ const NAV = [
   },
   {
     group: "Components V2",
+    icon: LayoutGrid,
     items: [
       { id: "v2-overview", label: "V2 overview" },
       { id: "v2-layout", label: "Layout components" },
@@ -402,6 +423,7 @@ const NAV = [
   },
   {
     group: "Snapshots",
+    icon: Camera,
     items: [
       { id: "snap-take", label: "Taking a snapshot" },
       { id: "snap-encode", label: "Encoding & sharing" },
@@ -410,6 +432,7 @@ const NAV = [
   },
   {
     group: "Reference",
+    icon: ScrollText,
     items: [
       { id: "ref-builtins", label: "Built-in categories" },
       { id: "ref-platform", label: "RaisuPlatform" },
@@ -418,6 +441,7 @@ const NAV = [
   },
   {
     group: "AI Resources",
+    icon: Bot,
     items: [
       { id: "ai-overview", label: "Library summary" },
       { id: "ai-wire", label: "Wire format spec" },
@@ -426,6 +450,7 @@ const NAV = [
   },
   {
     group: "Design Guide",
+    icon: Palette,
     items: [
       { id: "dg-showcase", label: "Live showcase" },
       { id: "dg-severity", label: "Severity system" },
@@ -486,12 +511,7 @@ export default function DocsPage() {
             {NAV.map((group) => (
               <div key={group.group}>
                 <p className="text-[10px] font-semibold text-zinc-600 uppercase tracking-widest mb-2 px-2 flex items-center gap-1.5">
-                  {group.group === "AI Resources" && (
-                    <Bot className="w-3 h-3 text-violet-600" />
-                  )}
-                  {group.group === "Design Guide" && (
-                    <Palette className="w-3 h-3 text-violet-500" />
-                  )}
+                  <group.icon className="w-3 h-3 text-violet-500" />
                   {group.group}
                 </p>
                 <div className="space-y-0.5">
@@ -526,7 +546,8 @@ export default function DocsPage() {
             {/* ══════════════════════════════════════════════════════════════ */}
 
             <section id="overview" className="scroll-mt-20">
-              <div className="mb-2 text-xs font-semibold text-violet-400 uppercase tracking-widest">
+              <div className="mb-2 text-xs font-semibold text-violet-400 uppercase tracking-widest flex items-center gap-1.5">
+                <BookOpen className="w-3.5 h-3.5" />
                 Introduction
               </div>
               <h1 className="text-3xl font-black text-white mb-5 tracking-tight">
@@ -560,7 +581,7 @@ export default function DocsPage() {
             </section>
 
             <section id="pipeline" className="scroll-mt-20">
-              <SectionH2>How it works</SectionH2>
+              <SectionH2 icon={GitCommitVertical}>How it works</SectionH2>
               <p className="text-zinc-400 text-sm leading-relaxed mb-6">
                 When you call{" "}
                 <code className="font-mono text-violet-300 bg-violet-500/8 px-1.5 py-0.5 rounded">
@@ -609,7 +630,7 @@ export default function DocsPage() {
             {/* ══════════════════════════════════════════════════════════════ */}
 
             <section id="modules" className="scroll-mt-20">
-              <SectionH2>Modules</SectionH2>
+              <SectionH2 icon={Package}>Modules</SectionH2>
               <DocTable
                 headers={["Artifact", "Purpose"]}
                 rows={[
@@ -628,7 +649,7 @@ export default function DocsPage() {
             </section>
 
             <section id="gradle" className="scroll-mt-20">
-              <SectionH2>Installation</SectionH2>
+              <SectionH2 icon={Package}>Installation</SectionH2>
               <p className="text-zinc-400 text-sm leading-relaxed mb-4">
                 Raisu is distributed via{" "}
                 <a
@@ -654,7 +675,7 @@ export default function DocsPage() {
             {/* ══════════════════════════════════════════════════════════════ */}
 
             <section id="qs-paper" className="scroll-mt-20">
-              <SectionH2>Quick start — Paper plugin</SectionH2>
+              <SectionH2 icon={Zap}>Quick start — Paper plugin</SectionH2>
               <p className="text-zinc-400 text-sm leading-relaxed mb-4">
                 {ic(
                   "Creates a Raisu instance with all built-in categories: `raisu:system`, `raisu:memory`, `raisu:threads`, `raisu:plugins`, `raisu:performance`."
@@ -683,7 +704,7 @@ public final class MyPlugin extends JavaPlugin {
             </section>
 
             <section id="qs-spigot" className="scroll-mt-20">
-              <SectionH2>Quick start — Spigot plugin</SectionH2>
+              <SectionH2 icon={Zap}>Quick start — Spigot plugin</SectionH2>
               <p className="text-zinc-400 text-sm leading-relaxed mb-4">
                 Same API as the Paper integration, without the Paper-specific
                 performance category.
@@ -694,7 +715,7 @@ raisu = SpigotRaisu.create(this);   // same API, no raisu:performance category
             </section>
 
             <section id="qs-standalone" className="scroll-mt-20">
-              <SectionH2>Quick start — Standalone</SectionH2>
+              <SectionH2 icon={Zap}>Quick start — Standalone</SectionH2>
               <p className="text-zinc-400 text-sm leading-relaxed mb-4">
                 {ic(
                   "Implement `RaisuPlatform` directly for any non-Bukkit environment. Only `serverVersion()` is required."
@@ -714,7 +735,7 @@ Raisu raisu = Raisu.create(platform);
             {/* ══════════════════════════════════════════════════════════════ */}
 
             <section id="cat-static" className="scroll-mt-20">
-              <SectionH2>Static categories</SectionH2>
+              <SectionH2 icon={Layers}>Static categories</SectionH2>
               <p className="text-zinc-400 text-sm leading-relaxed mb-4">
                 Use static categories when the data is known at registration
                 time and doesn't change between snapshots.
@@ -733,7 +754,7 @@ raisu.register(myCategory);
             </section>
 
             <section id="cat-dynamic" className="scroll-mt-20">
-              <SectionH2>Dynamic providers</SectionH2>
+              <SectionH2 icon={RefreshCw}>Dynamic providers</SectionH2>
               <p className="text-zinc-400 text-sm leading-relaxed mb-4">
                 {ic(
                   "Use `registerProvider` when data changes over time. The lambda is called each time `raisu.snapshot()` is invoked."
@@ -757,7 +778,7 @@ raisu.registerProvider("my:stats", () -> {
             </section>
 
             <section id="cat-builder" className="scroll-mt-20">
-              <SectionH2>Builder pattern</SectionH2>
+              <SectionH2 icon={Layers}>Builder pattern</SectionH2>
               <p className="text-zinc-400 text-sm leading-relaxed mb-4">
                 {ic(
                   "Mix built-in and custom categories using the platform builder. To disable all `raisu:*` defaults, call `.excludeDefaultCategories()`."
@@ -779,7 +800,7 @@ raisu = PaperRaisu.builder(this)
             {/* ══════════════════════════════════════════════════════════════ */}
 
             <section id="comp-types" className="scroll-mt-20">
-              <SectionH2>Component types (V1)</SectionH2>
+              <SectionH2 icon={Code2}>Component types (V1)</SectionH2>
               <p className="text-zinc-400 text-sm leading-relaxed mb-4">
                 {ic(
                   "All component interfaces live in `com.redactado.raisu.component`. V1 types are available from `raisu-api` version 1."
@@ -800,7 +821,7 @@ raisu = PaperRaisu.builder(this)
             </section>
 
             <section id="comp-create" className="scroll-mt-20">
-              <SectionH2>Creating V1 components</SectionH2>
+              <SectionH2 icon={Code2}>Creating V1 components</SectionH2>
               <Callout>
                 {ic(
                   "Public factory methods on component interfaces are planned for a future release. Until then, use the `*Impl` classes from `raisu-core` directly."
@@ -824,10 +845,11 @@ new TreeImpl(new TreeNodeImpl("root", children))
             {/* ══════════════════════════════════════════════════════════════ */}
 
             <section id="v2-overview" className="scroll-mt-20">
-              <div className="mb-2 text-xs font-semibold text-violet-400 uppercase tracking-widest">
+              <div className="mb-2 text-xs font-semibold text-violet-400 uppercase tracking-widest flex items-center gap-1.5">
+                <LayoutGrid className="w-3.5 h-3.5" />
                 Components V2
               </div>
-              <SectionH2>V2 component system</SectionH2>
+              <SectionH2 icon={LayoutGrid}>V2 component system</SectionH2>
               <p className="text-zinc-400 text-sm leading-relaxed mb-4">
                 The V2 component system extends V1 with two new categories of
                 primitives: <strong className="text-zinc-200">layout containers</strong> that compose child
@@ -866,7 +888,7 @@ new TreeImpl(new TreeNodeImpl("root", children))
             </section>
 
             <section id="v2-layout" className="scroll-mt-20">
-              <SectionH2>V2 — Layout components</SectionH2>
+              <SectionH2 icon={Layers}>V2 — Layout components</SectionH2>
               <p className="text-zinc-400 text-sm leading-relaxed mb-3">
                 Layout components are containers. Their{" "}
                 <code className="font-mono text-violet-300 bg-violet-500/8 px-1 py-0.5 rounded text-[11px]">children</code>{" "}
@@ -975,7 +997,7 @@ Panel.builder("Network Stats")
             </section>
 
             <section id="v2-display" className="scroll-mt-20">
-              <SectionH2>V2 — Display components</SectionH2>
+              <SectionH2 icon={BarChart3}>V2 — Display components</SectionH2>
               <p className="text-zinc-400 text-sm leading-relaxed mb-5">
                 Display components are leaf nodes — they render a single piece
                 of data without children.
@@ -1214,7 +1236,7 @@ Components.iframe("https://status.example.com", "Service Status", 300)
             {/* ══════════════════════════════════════════════════════════════ */}
 
             <section id="snap-take" className="scroll-mt-20">
-              <SectionH2>Taking a snapshot</SectionH2>
+              <SectionH2 icon={Camera}>Taking a snapshot</SectionH2>
               <CodeBlock lang="java">{`
 // Quick — includes all registered categories and providers:
 Snapshot snap = raisu.snapshot();
@@ -1229,7 +1251,7 @@ Snapshot snap = raisu.snapshotBuilder()
             </section>
 
             <section id="snap-encode" className="scroll-mt-20">
-              <SectionH2>Encoding & sharing</SectionH2>
+              <SectionH2 icon={Share2}>Encoding & sharing</SectionH2>
               <p className="text-zinc-400 text-sm leading-relaxed mb-4">
                 The{" "}
                 <code className="font-mono text-violet-300 bg-violet-500/8 px-1.5 py-0.5 rounded">
@@ -1250,7 +1272,7 @@ String shortcode = raisu.encode(snap, config);
             </section>
 
             <section id="snap-unregister" className="scroll-mt-20">
-              <SectionH2>Unregistering</SectionH2>
+              <SectionH2 icon={Trash2}>Unregistering</SectionH2>
               <CodeBlock lang="java">{`
 raisu.unregister("my:info");           // remove static category
 raisu.unregisterProvider("my:stats");  // remove dynamic provider
@@ -1262,7 +1284,7 @@ raisu.unregisterProvider("my:stats");  // remove dynamic provider
             {/* ══════════════════════════════════════════════════════════════ */}
 
             <section id="ref-builtins" className="scroll-mt-20">
-              <SectionH2>Built-in categories</SectionH2>
+              <SectionH2 icon={ScrollText}>Built-in categories</SectionH2>
 
               <p className="text-zinc-500 text-xs font-semibold uppercase tracking-widest mb-3">
                 raisu-spigot defaults
@@ -1289,7 +1311,7 @@ raisu.unregisterProvider("my:stats");  // remove dynamic provider
             </section>
 
             <section id="ref-platform" className="scroll-mt-20">
-              <SectionH2>RaisuPlatform contract</SectionH2>
+              <SectionH2 icon={Code2}>RaisuPlatform contract</SectionH2>
               <p className="text-zinc-400 text-sm leading-relaxed mb-4">
                 {ic(
                   "Implementing `RaisuPlatform` is all that's needed for any non-Bukkit environment. All defaults are sensible — only `serverVersion()` is required."
@@ -1308,7 +1330,7 @@ public interface RaisuPlatform {
             </section>
 
             <section id="ref-versioning" className="scroll-mt-20">
-              <SectionH2>Snapshot versioning</SectionH2>
+              <SectionH2 icon={GitCommitVertical}>Snapshot versioning</SectionH2>
               <p className="text-zinc-400 text-sm leading-relaxed mb-4">
                 The MessagePack payload includes a{" "}
                 <code className="font-mono text-violet-300 bg-violet-500/8 px-1.5 py-0.5 rounded">
@@ -1344,7 +1366,7 @@ public interface RaisuPlatform {
                 <Bot className="w-3.5 h-3.5" />
                 AI Resources
               </div>
-              <SectionH2>Library summary for LLMs</SectionH2>
+              <SectionH2 icon={Bot}>Library summary for LLMs</SectionH2>
               <div className="flex gap-3 mb-5 px-4 py-3.5 rounded-xl border border-violet-500/20 bg-violet-500/6">
                 <Bot className="w-4 h-4 text-violet-400 shrink-0 mt-0.5" />
                 <p className="text-violet-200/70 text-sm leading-relaxed">
@@ -1396,7 +1418,7 @@ public interface RaisuPlatform {
             </section>
 
             <section id="ai-wire" className="scroll-mt-20">
-              <SectionH2>Wire format specification</SectionH2>
+              <SectionH2 icon={Code2}>Wire format specification</SectionH2>
               <p className="text-zinc-400 text-sm leading-relaxed mb-5">
                 The decrypted payload is a MessagePack map. The following
                 pseudo-schema describes all known fields.
@@ -1456,7 +1478,7 @@ function decodeShortcode(shortcode: string): { providerId, pasteKey, aesKey } {
             </section>
 
             <section id="ai-components" className="scroll-mt-20">
-              <SectionH2>Component type reference</SectionH2>
+              <SectionH2 icon={ScrollText}>Component type reference</SectionH2>
               <p className="text-zinc-400 text-sm leading-relaxed mb-4">
                 Complete list of all component wire types and their data shapes.
                 Use this as ground truth when generating or parsing Raisu
@@ -1565,7 +1587,7 @@ IFRAME     { url: string, title: string|nil, height: int|nil }
             ══════════════════════════════════════════════════════════════════ */}
 
             <section id="dg-showcase" className="mb-12 scroll-mt-20">
-              <SectionH2 id="dg-showcase">Live showcase</SectionH2>
+              <SectionH2 id="dg-showcase" icon={AppWindow}>Live showcase</SectionH2>
               <p className="text-zinc-400 text-sm leading-relaxed mb-5">
                 Open the interactive component showcase to see every V2 component
                 rendered with real data. Use it to debug layouts, verify wire format
@@ -1586,7 +1608,7 @@ IFRAME     { url: string, title: string|nil, height: int|nil }
             </section>
 
             <section id="dg-severity" className="mb-12 scroll-mt-20">
-              <SectionH2 id="dg-severity">Severity system</SectionH2>
+              <SectionH2 id="dg-severity" icon={AlertTriangle}>Severity system</SectionH2>
               <p className="text-zinc-400 text-sm leading-relaxed mb-4">
                 Five components use the shared {ic("`Severity`")} enum:{" "}
                 {ic("`BADGE`")}, {ic("`ALERT`")}, and all log/timeline entries.
@@ -1628,7 +1650,7 @@ Alert.of(Severity.WARNING,
             </section>
 
             <section id="dg-layout" className="mb-12 scroll-mt-20">
-              <SectionH2 id="dg-layout">Layout patterns</SectionH2>
+              <SectionH2 id="dg-layout" icon={LayoutGrid}>Layout patterns</SectionH2>
               <p className="text-zinc-400 text-sm leading-relaxed mb-4">
                 Layout components ({ic("`COLUMN`")}, {ic("`ROW`")},{" "}
                 {ic("`GRID`")}, {ic("`PANEL`")}) are containers — they hold
