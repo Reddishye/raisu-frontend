@@ -165,6 +165,13 @@ export interface LinkData {
   url: string;
 }
 
+export interface IframeData {
+  url: string;
+  title?: string;
+  /** Height in pixels. Defaults to 400. */
+  height?: number;
+}
+
 // ── Union type ────────────────────────────────────────────────────────────────
 
 export type ComponentData =
@@ -190,4 +197,5 @@ export type ComponentData =
   | TimelineData
   | SparklineData
   | GaugeData
-  | LinkData;
+  | LinkData
+  | IframeData;
