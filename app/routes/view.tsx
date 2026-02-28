@@ -247,7 +247,7 @@ export default function ViewPage() {
           ref={mainRef}
           className="flex-1 overflow-y-auto scroll-smooth"
         >
-          <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 pb-24 md:pb-8 space-y-5">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 pb-24 md:pb-8 space-y-5">
             {sorted.map((cat) => (
               <section
                 key={cat.id}
