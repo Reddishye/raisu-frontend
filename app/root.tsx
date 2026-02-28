@@ -10,6 +10,9 @@ import {
 import type { Route } from "./+types/root";
 import "./app.css";
 
+const FONT_URL =
+  "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap";
+
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
@@ -17,22 +20,21 @@ export const links: Route.LinksFunction = () => [
     href: "https://fonts.gstatic.com",
     crossOrigin: "anonymous",
   },
-  {
-    rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
-  },
+  { rel: "preload", as: "style", href: FONT_URL },
+  { rel: "stylesheet", href: FONT_URL },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="h-full">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#09090b" />
         <Meta />
         <Links />
       </head>
-      <body>
+      <body className="h-full antialiased">
         {children}
         <ScrollRestoration />
         <Scripts />
@@ -62,12 +64,12 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   }
 
   return (
-    <main className="pt-16 p-4 container mx-auto">
-      <h1>{message}</h1>
-      <p>{details}</p>
+    <main className="min-h-screen flex flex-col items-center justify-center p-8 text-center gap-4">
+      <p className="text-5xl font-black text-zinc-800">{message}</p>
+      <p className="text-zinc-400 text-sm max-w-md">{details}</p>
       {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
-          <code>{stack}</code>
+        <pre className="mt-4 w-full max-w-2xl p-4 rounded-xl bg-zinc-900 border border-zinc-800 overflow-x-auto text-left text-xs font-mono text-zinc-500">
+          {stack}
         </pre>
       )}
     </main>
