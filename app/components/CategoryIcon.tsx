@@ -4,7 +4,7 @@ import {
   Server, Cpu, HardDrive, Users, Globe, Zap, Settings, BarChart2, Layers,
   Package, Database, Activity, Network, MemoryStick, Plug, Gamepad2, Map,
   Clock, AlertTriangle, Bug, Terminal, FileText, Shield, Flame, Box,
-  RefreshCw, Wrench, Gauge,
+  RefreshCw, Wrench, Gauge, Bell,
 } from "lucide-react";
 
 type IconComponent = React.ComponentType<LucideProps>;
@@ -19,6 +19,7 @@ const EMOJI_TO_ICON: Record<string, IconComponent> = {
   "👤": Users, "🧑": Users, "👾": Gamepad2, "🎮": Gamepad2,
   "🗺️": Map, "🏔️": Map, "🌲": Map, "🏕️": Map,
   "🗂️": Layers, "📂": Layers, "📁": Layers,
+  "🔔": Bell, "🔕": Bell,
   "🐛": Bug, "🚨": AlertTriangle, "⚠️": AlertTriangle, "❗": AlertTriangle,
   "📋": FileText, "📝": FileText, "💡": Zap, "🔑": Shield, "🛡️": Shield,
   "🔄": RefreshCw, "♻️": RefreshCw, ">_": Terminal, "📡": Network,
